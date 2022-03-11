@@ -43,7 +43,7 @@ def rgb_hist(image, size_hist=256, showRes=True):
         cv2.waitKey()
     return histImage
 
-def dominant_colours(img, n_colours=10):
+def dominant_colours(img, n_colours=10, show_palette=False):
     pixels = np.float32(img.reshape(-1, 3))
 
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 200, .1)
@@ -53,16 +53,19 @@ def dominant_colours(img, n_colours=10):
     _, counts = np.unique(labels, return_counts=True)
 
     indices = np.argsort(counts)[::-1]   
-    freqs = np.cumsum(np.hstack([[0], counts[indices]/float(counts.sum())]))
-    rows = np.int_(img.shape[0]*freqs)
+    freqs = [counts[indices]/float(counts.sum())]
 
-    dom_patch = np.zeros(shape=img.shape, dtype=np.uint8)
-    for i in range(len(rows) - 1):
-        dom_patch[rows[i]:rows[i + 1], :, :] += np.uint8(palette[indices[i]])
+    if show_palette:
+        cum_freq = np.cumsum(np.hstack([0], cum_freq))
+        rows = np.int_(img.shape[0]*cum_freq)
+        dom_patch = np.zeros(shape=img.shape, dtype=np.uint8)
+        for i in range(len(rows) - 1):
+            dom_patch[rows[i]:rows[i + 1], :, :] += np.uint8(palette[indices[i]])
+        cv2.imshow('Dominant colors', dom_patch)
+        cv2.waitKey()
     
+    return palette, freqs
 
-    cv2.imshow('Dominant colors', dom_patch)
-    cv2.waitKey()
 
 def resize_img(img, width=250, height=None):
     if not (width or height):
@@ -80,11 +83,20 @@ def resize_img(img, width=250, height=None):
     return cv2.resize(img, (width, height), interpolation = cv2.INTER_AREA)
 
 rimg = resize_img(src)
+palette, freqs = dominant_colours(rimg)
+search_c = np.array([240, 204, 25])
+
+euc_distances = np.argsort([np.linalg.norm(search_c-c) for c in palette])
+
+    
+
+print(palette[euc_distances[0]])
+
+
 rgb_hist(rimg)
 print(rimg.shape)
 cv2.imshow('calcHist Demo', rimg)
 cv2.waitKey()
-dominant_colours(rimg)
 
 
 # https://pyimagesearch.com/2014/07/14/3-ways-compare-histograms-using-opencv-python/

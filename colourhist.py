@@ -250,21 +250,17 @@ def search_by_colour(colour, dataset, serial_dc=None, topk=10):
 
 
 
-# color = cv2.cvtColor(np.array([[[177, 144, 231]]]), cv2.COLOR_BGR2LAB)
-
-b= np.array([[[233, 192, 129]]], dtype='uint8')
-color = cv2.cvtColor(b, cv2.COLOR_BGR2LAB)
+# b= np.array([[[233, 192, 129]]], dtype='uint8')
+# color = cv2.cvtColor(b, cv2.COLOR_BGR2LAB)
 
 
-dir_origin = 'pokemon_dataset\\'
+base_dir = 'pokemon_dataset\\'
 serial_path = 'colour_embeddings.pkl'
 
 dc = load_serialized_data(serial_path, return_dict_values=False)
-# for dirname, _, filenames in os.walk(dir_origin):
-#     pokemon = dirname.split('/')
-#     print(pokemon)
+
 dataset = np.array([os.path.join(dirname, filename)
-                        for dirname, _, filenames in os.walk(dir_origin) 
+                        for dirname, _, filenames in os.walk(base_dir) 
                             for filename in filenames 
                                 if filename.endswith(".jpg")
                     ]
@@ -272,8 +268,8 @@ dataset = np.array([os.path.join(dirname, filename)
 
 # serialize_dominant_colours(dataset)
 
-# # Yellow
-# search_c = np.array([232, 118, 217])
+# Yellow
+search_c = np.array([232, 118, 217])
 
 # Purple
 # search_c = np.array([168, 158, 88])
@@ -281,20 +277,20 @@ dataset = np.array([os.path.join(dirname, filename)
 # # Orange
 # search_c = np.array([168, 167, 199])
 
-# Pink
-search_c = np.array([226, 141, 132])
+# # Pink
+# search_c = np.array([226, 141, 132])
 
 # # Blue
 # search_c = np.array([191, 118, 101])
 
 SAMPLE_IMAGE = "pokemon_dataset\\Abra\\10a9f06ec6524c66b779ea80354f8519.jpg"
-dominant_colours(SAMPLE_IMAGE, show_palette=True)
+# dominant_colours(SAMPLE_IMAGE, show_palette=True)
 
 # img = cv2.cvtColor(cv2.imread("colours\\lila.jpg"), cv2.COLOR_BGR2LAB)
 
-# results = search_by_colour(search_c, dataset, serial_dc=serial_path)
+results = search_by_colour(search_c, dataset, serial_dc=serial_path)
 
-# plot_img_grid(results)
+plot_img_grid(results)
 
 
 # rimg = resize_img(src)

@@ -1,4 +1,5 @@
 from json import load
+import math
 import cv2
 import glob2
 import os
@@ -76,6 +77,28 @@ def store_embeddings(corpus_embeddings, out_filename='embeddings.pkl',
             
 def load_files_from_dirs_to_mm(*pattern_dirs, file_extension="jpg"):
     return np.array([f for directory in pattern_dirs for f in glob2.glob(directory + "\\*." + file_extension)])
+
+
+def _get_fig_layout(n_graphs, gs_x=5, gs_y=5, ncols=None):
+    if not ncols:
+        sqrt = math.sqrt(n_graphs)
+        ncols = sqrt + 1 if sqrt - int(sqrt) > 0 else sqrt
+        nrows = ncols
+    else: 
+        nrows = n_graphs//ncols if n_graphs%ncols == 0 \
+                else n_graphs//ncols +1 
+        
+    return (nrows, ncols), plt.figure(figsize=(gs_x*ncols, gs_y*nrows))
+
+def plot_img_grid(data, **kwargs):
+    grid_dim, fig = _get_fig_layout(len(data), **kwargs)
+    for i, img in enumerate(data):
+        num = 1 + i
+        ax = fig.add_subplot(*grid_dim, num)
+        ax.axis('off')
+        ax.imshow(cv2.cvtColor(cv2.imread(img), cv2.COLOR_BGR2RGB))
+    plt.tight_layout()
+    plt.show()
 
 def rgb_hist(image, size_hist=256, showRes=True):
     bgr_planes = cv2.split(image)
@@ -168,6 +191,11 @@ def search_by_colour(colour, dataset, serial_dc=None, topk=10):
 
 
 
+# color = cv2.cvtColor(np.array([[[177, 144, 231]]]), cv2.COLOR_BGR2LAB)
+
+b= np.array([[[233, 192, 129]]], dtype='uint8')
+color = cv2.cvtColor(b, cv2.COLOR_BGR2LAB)
+
 
 dir_origin = 'pokemon_dataset\\'
 serial_path = 'colour_embeddings.pkl'
@@ -185,14 +213,27 @@ dataset = np.array([os.path.join(dirname, filename)
 
 # serialize_dominant_colours(dataset)
 
+# Yellow
 search_c = np.array([232, 118, 217])
+
+# Purple
+search_c = np.array([168, 158, 88])
+
+# Orange
+search_c = np.array([168, 167, 199])
+
+# Pink
+search_c = np.array([226, 141, 132])
+
+# Blue
+search_c = np.array([191, 118, 101])
+
+
+img = cv2.cvtColor(cv2.imread("colours\\lila.jpg"), cv2.COLOR_BGR2LAB)
 
 results = search_by_colour(search_c, dataset, serial_dc=serial_path)
 
-for i, img in enumerate(results):
-    img = cv2.imread(img)
-    cv2.imshow(f'top_{i}', img)
-    cv2.waitKey()
+plot_img_grid(results)
 
 
 # rimg = resize_img(src)

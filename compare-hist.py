@@ -26,7 +26,14 @@ def serialize_hist(dataset, filename="hist_serial.pkl", **kwargs):
     store_serialized_data(dic, filename)
     return dic
 
-# @load_image
+
+def img_grid_even(img, hgrid=3, wgrid=3):
+    h, w, _ = img.shape
+    return [img[int(h/hgrid)*j:int(h/hgrid)*(j+1), 
+                int(w/wgrid)*i:int(w/wgrid)*(i+1)] 
+            for j in range(hgrid) for i in range(wgrid)]
+
+@load_image
 def calc_hist(img, n_channels=3, per_channel_bins = 8, per_channel_range=(0,256)):
     """ Compute a 3D RGB color histogram from the image, using 
     `per_channel_bins` bins per channel.
@@ -42,13 +49,18 @@ def calc_hist(img, n_channels=3, per_channel_bins = 8, per_channel_range=(0,256)
     :return: _description_
     :rtype: _type_
     """
-    if isinstance(img, np.str_) or isinstance(img, str):
-        img = cv2.imread(img)
     hist = cv2.calcHist([img], list(range(n_channels)), None, [per_channel_bins]*n_channels,
                         [*per_channel_range]*n_channels)
 
     return cv2.normalize(hist, hist).flatten()
     
+# divide en n 
+# para cada n -> calc_hist
+
+def grid_wise_compare_hist(grid1, grid2, **kwargs):
+    return
+
+
 def search_by_colour_hist(img, dataset, compare_method, serial_hist=None, topk=10):
     if compare_method not in COMPARE_METHODS:
         raise ValueError(f'Invalid compare method. Try again with one of correlation {list(compare_method.keys())}.')
@@ -72,7 +84,7 @@ histograms = load_serialized_data(SERIAL_PATH)
 
 image=SAMPLE_IMAGE
 
-results = search_by_colour_hist(SAMPLE_IMAGE, dataset, "correlation", serial_hist=SERIAL_PATH)
+results = search_by_colour_hist(SAMPLE_IMAGE, dataset, "hellinger", serial_hist=SERIAL_PATH)
 
 plot_img_grid(results)
 

@@ -178,23 +178,23 @@ dataset = scan_files(base_dir)
 
 # serialize_dominant_colours(dataset)
 
-# Yellow
-search_c = np.array([232, 118, 217])
+# # Yellow
+# search_c = np.array([232, 118, 217])
 
-# Purple
+## Purple
 # search_c = np.array([168, 158, 88])
 
-# # Orange
+# Orange
 # search_c = np.array([168, 167, 199])
 
 # # Pink
 # search_c = np.array([226, 141, 132])
 
 # # Blue
-# search_c = np.array([191, 118, 101])
+search_c = np.array([191, 118, 101])
 
 SAMPLE_IMAGE = "pokemon_dataset\\Abra\\10a9f06ec6524c66b779ea80354f8519.jpg"
-dominant_colours(SAMPLE_IMAGE, show_palette=True)
+# dominant_colours(SAMPLE_IMAGE, show_palette=True)
 
 # img = cv2.cvtColor(cv2.imread("colours\\lila.jpg"), cv2.COLOR_BGR2LAB)
 

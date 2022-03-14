@@ -1,15 +1,9 @@
-from multiprocessing.sharedctypes import Value
-from typing import Literal
-from scipy.spatial import distance as dist
-import matplotlib.pyplot as plt
 import numpy as np
-import argparse
-import glob
 import cv2
 from utils import *
 
 BASE_DIR = 'pokemon_dataset\\'
-SAMPLE_IMAGE = "pokemon_dataset\\Abra\\10a9f06ec6524c66b779ea80354f8519.jpg"
+SAMPLE_IMAGE = "colours\\10a9f06ec6524c66b779ea80354f8519.jpg"
 SERIAL_PATH = 'hist_serial.pkl'
 # initialize OpenCV methods for histogram comparison
 COMPARE_METHODS = {
@@ -58,11 +52,14 @@ def calc_hist(img, n_channels=3, per_channel_bins = 8, per_channel_range=(0,256)
 def search_by_colour_hist(img, dataset, compare_method, serial_hist=None, topk=10):
     if compare_method not in COMPARE_METHODS:
         raise ValueError(f'Invalid compare method. Try again with one of correlation {list(compare_method.keys())}.')
+    # The histogram of the image query should be computed just once.
+    hist_img = calc_hist(img)
     if serial_hist:
         sh = load_serialized_data(serial_hist)
-        # Override existing definition of dominant colours extraction.
-        # calc_hist = lambda img: sh[img]
-    scores = np.argsort([cv2.compareHist(calc_hist(img), calc_hist(dimg), COMPARE_METHODS[compare_method]) for dimg in dataset])
+        # Override existing definition of colour histogram calculus.
+        scores = np.argsort([cv2.compareHist(hist_img, sh[dimg], COMPARE_METHODS[compare_method]) for dimg in dataset])
+    else:
+        scores = np.argsort([cv2.compareHist(hist_img, calc_hist(dimg), COMPARE_METHODS[compare_method]) for dimg in dataset])
     if compare_method=="correlation" or compare_method=="intersection":
         scores = scores[::-1]
     return dataset[scores[:topk]]
@@ -75,7 +72,7 @@ histograms = load_serialized_data(SERIAL_PATH)
 
 image=SAMPLE_IMAGE
 
-results = search_by_colour_hist(SAMPLE_IMAGE, dataset, "correlation")
+results = search_by_colour_hist(SAMPLE_IMAGE, dataset, "correlation", serial_hist=SERIAL_PATH)
 
 plot_img_grid(results)
 

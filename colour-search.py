@@ -96,8 +96,7 @@ def dominant_colours(img, n_colours=5, show_palette=False,
             dom_img[rows[i]:rows[i + 1], :, :] += np.uint8(palette[indices[i]])
         # plot the original image, along with that of its dominant colours in
         # the RGB colour space.
-        plot_img_grid([img, dom_img], img_like=True, 
-                       col_space_conv=cv2.COLOR_LAB2RGB, ncols=1)
+        plot_img_grid([img, dom_img], col_space_conv=cv2.COLOR_LAB2RGB, ncols=1)
 
     # Return the collection of dominant colours and their frequence
     return palette, freqs
@@ -161,9 +160,9 @@ def search_by_colour(colour, dataset, serial_dc=None, topk=10):
     if serial_dc:
         dc = load_serialized_data(serial_dc)
         # Override existing definition of dominant colours extraction.
-        dominant_colours = lambda img: dc[img]
-
-    scores = np.argsort([colour_img_score(colour, dominant_colours(img)[0]) for img in dataset])
+        scores = np.argsort([colour_img_score(colour, dc[img][0]) for img in dataset])
+    else:
+        scores = np.argsort([colour_img_score(colour, dominant_colours(img)[0]) for img in dataset])
     return dataset[scores[:topk]]
 
 

@@ -4,7 +4,6 @@ import utils
 import os
 from img_search import ImgSearch
 
-
 class HistogramSearch(ImgSearch):
 
     COMPARE_METHODS = {
@@ -182,7 +181,7 @@ if __name__ == "__main__":
     SERIAL_PATH = 'serial\\hist_serial.pkl'
     HGRID=5
     WGRID=5
-    SERIAL_GRID_PATH = f'serial\\hist_serial_w{5}_h{5}.pkl'
+    SERIAL_GRID_PATH = f'serial\\hist_serial_w{HGRID}_h{WGRID}.pkl'
     # initialize OpenCV methods for histogram comparison
     histogram_search = HistogramSearch(BASE_DIR, serial_hist_path=SERIAL_PATH, serial_grid_hist_path=SERIAL_GRID_PATH)
 

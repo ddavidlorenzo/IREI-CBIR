@@ -1,4 +1,3 @@
-from json import load
 import math
 import cv2
 import os
@@ -86,13 +85,6 @@ def scan_files(fdir, file_extension="jpg"):
                     if filename.endswith(f".{file_extension}")
            ])
 
-def load_image(func):
-    def inner(img, **kwargs):
-        if isinstance(img, np.str_) or isinstance(img, str):
-            img = cv2.imread(img)
-        return func(img, **kwargs)
-    return inner
-
 def _get_fig_layout(n_graphs, gs_x=5, gs_y=5, ncols=None):
     """Get optimal plot layout for `n_graphs` subplots.
 
@@ -110,11 +102,11 @@ def _get_fig_layout(n_graphs, gs_x=5, gs_y=5, ncols=None):
     if not ncols:
         # obtain a square layout
         sqrt = math.sqrt(n_graphs)
-        ncols = sqrt + 1 if sqrt - int(sqrt) > 0 else sqrt
+        ncols = int(sqrt + 1 if sqrt - int(sqrt) > 0 else sqrt)
         nrows = ncols
     else: 
-        nrows = n_graphs//ncols if n_graphs%ncols == 0 \
-                else n_graphs//ncols +1 
+        nrows = int(n_graphs/ncols if n_graphs%ncols == 0 \
+                else n_graphs/ncols +1)
         
     return (nrows, ncols), plt.figure(figsize=(gs_x*ncols, gs_y*nrows))
 
@@ -138,3 +130,18 @@ def plot_img_grid(data, col_space_conv=None, **kwargs):
             ax.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
     plt.tight_layout()
     plt.show()
+
+def resize_img(img, width=250, height=None):
+    if not (width or height):
+        raise ValueError('Either the new width or height must be specified.')
+    if width and height:
+        pass 
+    elif width:
+        resize_prop = width/img.shape[1]
+        height = int(img.shape[0]*resize_prop)
+    elif height:
+        resize_prop = height/img.shape[0]
+        width = int(img.shape[1]*resize_prop)
+
+    # resize image
+    return cv2.resize(img, (width, height), interpolation = cv2.INTER_AREA)

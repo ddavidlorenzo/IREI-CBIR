@@ -147,24 +147,12 @@ class ColourSearch(ImgSearch):
 
 if __name__ == "__main__":
     BASE_DIR = 'pokemon_dataset\\'
-
+    
     # b= np.array([[[233, 192, 129]]], dtype='uint8')
     # color = cv2.cvtColor(b, cv2.COLOR_BGR2LAB)
 
     # Yellow
     COLOUR = np.array([232, 118, 217])
-
-    ## Purple
-    # search_c = np.array([168, 158, 88])
-
-    # Orange
-    # search_c = np.array([168, 167, 199])
-
-    # # Pink
-    # search_c = np.array([226, 141, 132])
-
-    # # Blue
-    # search_c = np.array([191, 118, 101])
 
     SERIAL_PATH = 'serial\\colour_serial.pkl'
 

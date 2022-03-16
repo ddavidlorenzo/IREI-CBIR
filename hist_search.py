@@ -7,9 +7,9 @@ from img_search import ImgSearch
 class HistogramSearch(ImgSearch):
 
     COMPARE_METHODS = {
-        "correlation": cv2.HISTCMP_CORREL,
-        "chi-square": cv2.HISTCMP_CHISQR,
-        "intersection": cv2.HISTCMP_INTERSECT,
+        "corr": cv2.HISTCMP_CORREL,
+        "chisq": cv2.HISTCMP_CHISQR,
+        "intersect": cv2.HISTCMP_INTERSECT,
         "hellinger": cv2.HISTCMP_BHATTACHARYYA
     }
 
@@ -85,7 +85,7 @@ class HistogramSearch(ImgSearch):
     def check_valid_compare_method(func):
         def inner(self, img, compare_method, **args):
             if compare_method not in self.COMPARE_METHODS:
-                raise ValueError(f'Invalid compare method. Try again with one of correlation {list(self.COMPARE_METHODS.keys())}.')
+                raise ValueError(f'Invalid compare method. Try again with one of {list(self.COMPARE_METHODS.keys())}.')
             return func(self, img, compare_method, **args)
         return inner
 
@@ -115,7 +115,7 @@ class HistogramSearch(ImgSearch):
                     ]
                 )
 
-        if compare_method=="correlation" or compare_method=="intersection":
+        if compare_method=="corr" or compare_method=="intersect":
             scores = scores[::-1]
         return self.dataset[scores[:topk]]  
 
@@ -181,7 +181,7 @@ if __name__ == "__main__":
     SERIAL_PATH = 'serial\\hist_serial.pkl'
     HGRID=5
     WGRID=5
-    SERIAL_GRID_PATH = f'serial\\hist_serial_w{HGRID}_h{WGRID}.pkl'
+    SERIAL_GRID_PATH = f'serial\\hist_serial_w{WGRID}_h{HGRID}.pkl'
     # initialize OpenCV methods for histogram comparison
     histogram_search = HistogramSearch(BASE_DIR, serial_hist_path=SERIAL_PATH, serial_grid_hist_path=SERIAL_GRID_PATH)
 

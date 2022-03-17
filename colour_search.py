@@ -1,3 +1,4 @@
+from typing import Iterable, List, Tuple, Union
 import cv2
 import os
 import numpy as np
@@ -5,42 +6,62 @@ import utils
 from img_search import ImgSearch
 
 class ColourSearch(ImgSearch):
+    """This class implements a colour search IR method."""
+
+    # Precomputed dominant colours of the constituent images.
     __serial_colour = None
     
     def __init__(self,
-                dataset,
-                serial_colour_path=None,
-                ):
-        """_summary_
+                dataset: Union[Iterable[np.array],str],
+                serial_colour_path:str=None,
+                ) -> None:
+        """Constructor for a `HistogramSearch` instance.
 
-        :param dataset: _description_
-        :type dataset: _type_
-        :param serial_colour_path: precomputed collection of dominant colours for each object in
-        the dataset, defaults to None
-        :type serial_colour_path: dict, optional
+        :param dataset: dataset of images or path to the directory
+         containg input samples.
+        :type dataset: iterable collection of images.
+        :param serial_colour_path: path to serialize the computed dominant 
+         colours, defaults to None.
+        :type serial_colour_path: str, optional
         """
         super().__init__(dataset)
         if serial_colour_path: 
             self.serial_colour = serial_colour_path
 
     @property
-    def serial_colour(self):
+    def serial_colour(self) -> dict:
+        """Getter method for `serial_colour`
+
+        :return: precomputed dominant colours of all images in the dataset.
+        :rtype: dict
+        """
         return self.__serial_colour
 
     @serial_colour.setter
-    def serial_colour(self, path):
+    def serial_colour(self, path:str) -> None:
+        """Set or update the filepath to load (store) the dominant colours computed.
+
+        :param path: filepath to load (store) the dominant colours precomputed (computed).
+        :type path: str
+        """
+        # If the index exists, load it off disk.
         if os.path.exists(path):
             print(f'Loading serialized data from path "{path}"')
             self.__serial_colour = utils.load_serialized_data(path)
+        # otherwise, dump data to filepath `path`
         else:
             print(f"File {path} does not exists. Creating a new index in that path.")
             self.__serial_colour = self.serialize(path)
-            return self.__serial_colour
 
-    def dominant_colours(self, img, n_colours=5, show_palette=False, 
-                        kmeans_max_iter=200, kmeans_eps=0.1,
-                        kmeans_init=cv2.KMEANS_RANDOM_CENTERS,
-                        kmeans_max_attempts=10):
+    def dominant_colours(self, 
+                         img:str,
+                         n_colours:int=5,
+                         show_palette:bool=False, 
+                         kmeans_max_iter:int=200, 
+                         kmeans_eps:float=0.1,
+                         kmeans_init:int=cv2.KMEANS_RANDOM_CENTERS,
+                         kmeans_max_attempts:int=10
+                        ) -> Tuple[Iterable[np.array], Iterable[np.array]]:
         """Compute the `n_colours` most representative colours of
         an image located in the path `img`.
 
@@ -65,6 +86,7 @@ class ColourSearch(ImgSearch):
         :type kmeans_max_attempts: int, optional
         :return: Collection of dominant colours and their frequence
         of appearance.
+        :rtype: Tuple[Iterable[np.array], Iterable[np.array]]
         """
         # Read image usingk l*a*b colour space.
         img = cv2.cvtColor(cv2.imread(img), cv2.COLOR_BGR2LAB)
@@ -104,7 +126,7 @@ class ColourSearch(ImgSearch):
         # Return the collection of dominant colours and their frequence
         return palette, freqs
 
-    def serialize(self, filename="serial\\colour_serial.pkl", **kwargs):
+    def serialize(self, filename:str="serial\\colour_serial.pkl", **kwargs) -> Iterable[np.array]:
         """Serialize the computed dominant colours of the images in a dataset.
 
         :param filename: output filepath, defaults to "serial\\colour_serial.pkl"
@@ -115,20 +137,20 @@ class ColourSearch(ImgSearch):
         utils.store_serialized_data(dic, filename)
         return dic
 
-    def score_colour_img(self, colour, palette):
+    def score_colour_img(self, colour:np.array, palette:Iterable[np.array]) -> float:
         """Returns the minimum euclidean distance between the target colour
         and the dominant colours of an image, encoded in `palette`
 
-        :param colour: _description_
-        :type colour: _type_
+        :param colour: target colour
+        :type colour: np.array
         :param palette: Collection of dominant colours
-        :type palette: Iterable
+        :type palette: Iterable[np.array]
         :return: Distance to the semantically closest colour to the target colour.
         :rtype: float
         """
         return min([np.linalg.norm(colour-c) for c in palette])
 
-    def search(self, colour, topk=10):
+    def search(self, colour:np.array, topk=10)->List[np.array]:
         """Search images in `dataset` matching with similar colours to `colour`.
 
         :param colour: query colour
@@ -136,7 +158,7 @@ class ColourSearch(ImgSearch):
         :param topk: top k images to retrieve, defaults to 10
         :type topk: int, optional
         :return: top k most relevant images found
-        :rtype: list
+        :rtype: List[np.array]
         """
         if self.serial_colour:
             scores = np.argsort([self.score_colour_img(colour, self.serial_colour[img][0]) for img in self.dataset])
@@ -145,6 +167,7 @@ class ColourSearch(ImgSearch):
         return self.dataset[scores[:topk]]
 
 
+# Execution example
 if __name__ == "__main__":
     BASE_DIR = 'pokemon_dataset\\'
     
@@ -153,12 +176,9 @@ if __name__ == "__main__":
 
     # Yellow
     COLOUR = np.array([232, 118, 217])
-
     SERIAL_PATH = 'serial\\colour_serial.pkl'
 
-    # initialize OpenCV methods for histogram comparison
     colour_search = ColourSearch(BASE_DIR, serial_colour_path=SERIAL_PATH)
 
     results = colour_search.search(COLOUR)
-
     utils.plot_img_grid(results)

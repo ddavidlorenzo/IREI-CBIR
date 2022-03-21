@@ -277,8 +277,8 @@ if __name__ == "__main__":
     BASE_DIR = 'pokemon_dataset\\'
     SAMPLE_IMAGE = "pokemon_dataset\\Aerodactyl\\d1d381e5f2df42a0973e0251751e1a14.jpg"
     SERIAL_PATH = 'serial\\hist_serial.pkl'
-    HGRID=5
-    WGRID=5
+    HGRID=3
+    WGRID=3
     SERIAL_GRID_PATH = f'serial\\hist_serial_w{WGRID}_h{HGRID}.pkl'
    
     histogram_search = HistogramSearch(BASE_DIR, serial_hist_path=SERIAL_PATH, serial_grid_hist_path=SERIAL_GRID_PATH)

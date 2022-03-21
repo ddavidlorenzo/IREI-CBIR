@@ -23,7 +23,7 @@ def remove_filename_from_path(out_filename:str, path_standard_format:bool=False)
     return (out_filename if '/' not in out_filename else
         out_filename.replace(out_filename.split('/')[-1], ''))
 
-def makedir(path:str, remove_filename:bool=False, recursive:bool=True, exist_ok:bool=True)->None:
+def makedir(path:str, remove_filename:bool=False, recursive:bool=True, exist_ok:bool=True, **kwargs)->None:
     """Creates directory from path if not exists.
     
     :param path: Path of the directory to be created.
@@ -39,7 +39,7 @@ def makedir(path:str, remove_filename:bool=False, recursive:bool=True, exist_ok:
     :type exist_ok: bool, optional
     """
     if '/' in path or '\\' in path:
-        path = path if not remove_filename else remove_filename_from_path(path)
+        path = path if not remove_filename else remove_filename_from_path(path, **kwargs)
         Path(path).mkdir(parents=recursive, exist_ok=exist_ok)
 
 def load_serialized_data(filename:str, return_dict_values:bool=False) -> Union[dict, Any]:
@@ -58,18 +58,18 @@ def load_serialized_data(filename:str, return_dict_values:bool=False) -> Union[d
         stored_data = pickle.load(fIn)
     return stored_data.values() if return_dict_values else stored_data
 
-def store_serialized_data(data, out_filename:str='serialized_data.pkl',
+def store_serialized_data(data, out_filename:str='serial\\serialized_data.pkl',
         protocol:int=pickle.HIGHEST_PROTOCOL) -> None:
     """Utility to dump precomputed data to disk using *pickle*.
 
     :param data: Tensor type data structure containing the dominant
      colours or histogram(s) for each sample in the dataset
-    :param out_filename: Path for the output file, defaults to 'serialized_data.pkl'.
+    :param out_filename: Path for the output file, defaults to 'serial\\serialized_data.pkl'.
     :type out_filename: str, optional
     :param protocol: Protocol used for *pickle*, defaults to `pickle.HIGHEST_PROTOCOL`.
     """
     # Create directory if it does not exist.
-    makedir(out_filename, remove_filename=True)
+    makedir(out_filename, remove_filename=True, path_standard_format=True)
     with open(out_filename, "wb") as fOut:
         pickle.dump(data, fOut, protocol=protocol)
   

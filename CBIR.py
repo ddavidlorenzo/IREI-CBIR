@@ -63,7 +63,7 @@ if __name__ == '__main__':
                                                                       wgrid=args.wgrid
                                                                     )
                                     )
-        results = img_search.smart_search(args.image, args.comparemethod, topk=args.topk)
+        results = img_search.smart_search(args.image, args.comparemethod, topk=args.topk, hgrid=args.hgrid, wgrid=args.wgrid)
     else:
         img_search = ColourSearch(args.datapath, serial_colour_path=get_serial_path(args.search, args.serialize))
         results = img_search.search(load_input_colour(args.colour), topk=args.topk)

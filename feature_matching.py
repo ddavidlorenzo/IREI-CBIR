@@ -1,8 +1,17 @@
 import numpy as np
 import cv2 as cv
 import matplotlib.pyplot as plt
-img1 = cv.imread('box.png',cv.IMREAD_GRAYSCALE)          # queryImage
-img2 = cv.imread('box_in_scene.png',cv.IMREAD_GRAYSCALE) # trainImage
+
+PATH_IMG1 = "pokemon_dataset\\Aerodactyl\\d1d381e5f2df42a0973e0251751e1a14.jpg"
+PATH_IMG2 = "pokemon_dataset\\Aerodactyl\\25d15a304c354f3e8064249cf704370d.jpg"
+PATH_IMG2 = "colours\\25d15a304c354f3e8064249cf704370d.jpg"
+
+PATH_IMG1 = "pokemon_dataset\\Arbok\\2382e5e913f94dd7845e6b1ac733ef18.jpg"
+PATH_IMG2 = "pokemon_dataset\\Arbok\\e2581f92a35646368e416d242d6f64ca.jpg"
+PATH_IMG2 = "colours\\e2581f92a35646368e416d242d6f64ca.jpg"
+
+img1 = cv.imread(PATH_IMG1,cv.IMREAD_GRAYSCALE)          # queryImage
+img2 = cv.imread(PATH_IMG2,cv.IMREAD_GRAYSCALE) # trainImage
 # Initiate SIFT detector
 sift = cv.SIFT_create()
 # find the keypoints and descriptors with SIFT

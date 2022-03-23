@@ -4,6 +4,7 @@ import os
 import numpy as np
 import utils
 from img_search import ImgSearch
+from functools import wraps
 
 class ColourSearch(ImgSearch):
     """This class implements a colour search IR method."""
@@ -68,24 +69,24 @@ class ColourSearch(ImgSearch):
         :param img: Path to an image
         :type img: str
         :param n_colours: Number of representative colours to get 
-        from the image, defaults to 5
+         from the image, defaults to 5
         :type n_colours: int, optional
         :param show_palette: show the resultant colour palette, 
-        defaults to False
+         defaults to False
         :type show_palette: bool, optional
         :param kmeans_max_iter: Maximum number of iterations for k-means,
-        defaults to 200
+         defaults to 200
         :type kmeans_max_iter: int, optional
         :param kmeans_eps: Epsilon value for k-means, defaults to 0.1
         :type kmeans_eps: float, optional
         :param kmeans_init: K-means nitialization method, defaults 
-        to cv2.KMEANS_RANDOM_CENTERS
+         to cv2.KMEANS_RANDOM_CENTERS
         :type kmeans_init: int, optional
         :param kmeans_max_attempts: Maximum number of attempts of the k-means
-        algorithm, defaults to 10
+         algorithm, defaults to 10
         :type kmeans_max_attempts: int, optional
         :return: Collection of dominant colours and their frequence
-        of appearance.
+         of appearance.
         :rtype: Tuple[Iterable[np.ndarray], Iterable[np.ndarray]]
         """
         # Read image usingk l*a*b colour space.

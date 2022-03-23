@@ -4,6 +4,7 @@ import cv2
 import utils
 import os
 from img_search import ImgSearch
+from functools import wraps
 
 class HistogramSearch(ImgSearch):
     """This class implements a histogram search IR method, which allows 
@@ -52,7 +53,7 @@ class HistogramSearch(ImgSearch):
         :param filename: output filepath, defaults to "serial\\colour_serial.pkl"
         :type filename: str, optional
         :param grid: whether to compute histograms by regions (in a grid-like fashion),
-        defaults to False
+         defaults to False
         :type grid: bool, optional
         :return: collection of dominant colours and their frequence 
         """
@@ -116,6 +117,7 @@ class HistogramSearch(ImgSearch):
         :param func: callable function
         :type func: Callable
         """
+        @wraps(func)
         def inner(self, img, compare_method, **args):
             if compare_method not in self.COMPARE_METHODS:
                 raise ValueError(f'Invalid compare method. Try again with one of {list(self.COMPARE_METHODS.keys())}.')
@@ -180,7 +182,7 @@ class HistogramSearch(ImgSearch):
                **kwargs
                ) -> List[np.ndarray]:
         """Performs basic histogram search. On the regular, less accurate than
-         smart histogram search, albeit noticeably faster for large datasets.
+        smart histogram search, albeit noticeably faster for large datasets.
 
         :param img: image or path to target image.
         :type img: Union[np.ndarray,str]

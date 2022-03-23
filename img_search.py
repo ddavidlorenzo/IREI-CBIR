@@ -1,3 +1,4 @@
+from functools import wraps
 from typing import Callable, Iterable, Union
 import utils
 import numpy as np
@@ -24,6 +25,7 @@ class ImgSearch(object):
         :param func: callable function
         :type func: Callable
         """
+        @wraps(func)
         def inner(self, img, **kwargs):
             if isinstance(img, np.str_) or isinstance(img, str):
                 img = cv2.imread(img)

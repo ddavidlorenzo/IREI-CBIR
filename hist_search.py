@@ -4,6 +4,7 @@ import cv2
 import utils
 import os
 from img_search import ImgSearch
+from functools import wraps
 
 class HistogramSearch(ImgSearch):
     """This class implements a histogram search IR method, which allows 
@@ -24,7 +25,7 @@ class HistogramSearch(ImgSearch):
     __serial_grid_hist = None
     
     def __init__(self,
-                dataset:Union[Iterable[np.array],str],
+                dataset:Union[Iterable[np.ndarray],str],
                 serial_hist_path:str=None,
                 serial_grid_hist_path:str=None
                 ) -> None:
@@ -32,7 +33,7 @@ class HistogramSearch(ImgSearch):
 
         :param dataset: dataset of images or path to the directory
          containg input samples.
-        :type dataset: Union[Iterable[np.array],str]
+        :type dataset: Union[Iterable[np.ndarray],str]
         :param serial_hist_path: Path to serialize computed histograms, defaults to None
         :type serial_hist_path: str, optional
         :param serial_grid_hist_path: Path to serialize computed grid 
@@ -52,7 +53,7 @@ class HistogramSearch(ImgSearch):
         :param filename: output filepath, defaults to "serial\\colour_serial.pkl"
         :type filename: str, optional
         :param grid: whether to compute histograms by regions (in a grid-like fashion),
-        defaults to False
+         defaults to False
         :type grid: bool, optional
         :return: collection of dominant colours and their frequence 
         """
@@ -64,18 +65,18 @@ class HistogramSearch(ImgSearch):
         return dic
 
     @ImgSearch.load_image
-    def img_grid(self, img:Union[np.array,str], hgrid:int=5, wgrid:int=5)->List[np.array]:
+    def img_grid(self, img:Union[np.ndarray,str], hgrid:int=5, wgrid:int=5)->List[np.ndarray]:
         """Divide an image in equally-sized fragments, conforming a grid with 
         `hgrid` columns and `wgrid` rows.
 
         :param img: image or path to target image.
-        :type img: Union[np.array,str]
+        :type img: Union[np.ndarray,str]
         :param hgrid: number of columns to compute the image grid, defaults to 5
         :type hgrid: int, optional
         :param wgrid: number of rows to compute the image grid, defaults to 5
         :type wgrid: int, optional
         :return: grid of subimages.
-        :rtype: List[np.array]
+        :rtype: List[np.ndarray]
         """
         h, w, _ = img.shape
         return [img[int(h/hgrid)*j:int(h/hgrid)*(j+1), 
@@ -84,16 +85,16 @@ class HistogramSearch(ImgSearch):
 
     @ImgSearch.load_image
     def calc_hist(self, 
-                  img:Union[np.array,str], 
+                  img:Union[np.ndarray,str], 
                   n_channels:int = 3, 
                   per_channel_bins:int = 8,
                   per_channel_range:int = (0,256)
-                 ) -> np.array:
+                 ) -> np.ndarray:
         """ Compute a 3D RGB color histogram from the image, using 
         `per_channel_bins` bins per channel.
 
         :param img: image or path to target image.
-        :type img: Union[np.array,str]
+        :type img: Union[np.ndarray,str]
         :param n_channels: number of channels of the image, defaults to 3
         :type n_channels: int
         :param per_channel_bins: number of bins per each used dimension,
@@ -103,7 +104,7 @@ class HistogramSearch(ImgSearch):
          dimension, defaults to (0,256)
         :type per_channel_range: tuple, optional
         :return: histogram of the image
-        :rtype: np.array
+        :rtype: np.ndarray
         """
         hist = cv2.calcHist([img], list(range(n_channels)), None, [per_channel_bins]*n_channels,
                             [*per_channel_range]*n_channels)
@@ -116,6 +117,7 @@ class HistogramSearch(ImgSearch):
         :param func: callable function
         :type func: Callable
         """
+        @wraps(func)
         def inner(self, img, compare_method, **args):
             if compare_method not in self.COMPARE_METHODS:
                 raise ValueError(f'Invalid compare method. Try again with one of {list(self.COMPARE_METHODS.keys())}.')
@@ -124,21 +126,21 @@ class HistogramSearch(ImgSearch):
 
     @check_valid_compare_method
     def smart_search(self, 
-                     img:Union[np.array,str], 
+                     img:Union[np.ndarray,str], 
                      compare_method:str, 
                      topk:int=10, 
                      **kwargs
-                    ) -> List[np.array]:
+                    ) -> List[np.ndarray]:
         """Performs smart histogram search.
 
         :param img: image or path to target image.
-        :type img: Union[np.array,str]
+        :type img: Union[np.ndarray,str]
         :param compare_method: comparison method
         :type compare_method: str
         :param topk: top k images to retrieve, defaults to 10
         :type topk: int, optional
         :return: top k most relevant images
-        :rtype: List[np.array]
+        :rtype: List[np.ndarray]
         """
         # Histograms of the image query should be computed just once.
         hist_grid_img = [self.calc_hist(simg) for simg in self.img_grid(img, **kwargs)]
@@ -174,22 +176,22 @@ class HistogramSearch(ImgSearch):
 
     @check_valid_compare_method
     def search(self, 
-               img:Union[np.array, str],
+               img:Union[np.ndarray, str],
                compare_method:str,
                topk:int=10,
                **kwargs
-               ) -> List[np.array]:
+               ) -> List[np.ndarray]:
         """Performs basic histogram search. On the regular, less accurate than
-         smart histogram search, albeit noticeably faster for large datasets.
+        smart histogram search, albeit noticeably faster for large datasets.
 
         :param img: image or path to target image.
-        :type img: Union[np.array,str]
+        :type img: Union[np.ndarray,str]
         :param compare_method: comparison method
         :type compare_method: str
         :param topk: top k images to retrieve, defaults to 10
         :type topk: int, optional
         :return: top k most relevant images
-        :rtype: List[np.array]
+        :rtype: List[np.ndarray]
         """
         # The histogram of the image query should be computed just once.
         hist_img = self.calc_hist(img, **kwargs)
@@ -277,8 +279,8 @@ if __name__ == "__main__":
     BASE_DIR = 'pokemon_dataset\\'
     SAMPLE_IMAGE = "pokemon_dataset\\Aerodactyl\\d1d381e5f2df42a0973e0251751e1a14.jpg"
     SERIAL_PATH = 'serial\\hist_serial.pkl'
-    HGRID=5
-    WGRID=5
+    HGRID=3
+    WGRID=3
     SERIAL_GRID_PATH = f'serial\\hist_serial_w{WGRID}_h{HGRID}.pkl'
    
     histogram_search = HistogramSearch(BASE_DIR, serial_hist_path=SERIAL_PATH, serial_grid_hist_path=SERIAL_GRID_PATH)

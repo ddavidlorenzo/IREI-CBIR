@@ -23,7 +23,7 @@ def remove_filename_from_path(out_filename:str, path_standard_format:bool=False)
     return (out_filename if '/' not in out_filename else
         out_filename.replace(out_filename.split('/')[-1], ''))
 
-def makedir(path:str, remove_filename:bool=False, recursive:bool=True, exist_ok:bool=True)->None:
+def makedir(path:str, remove_filename:bool=False, recursive:bool=True, exist_ok:bool=True, **kwargs)->None:
     """Creates directory from path if not exists.
     
     :param path: Path of the directory to be created.
@@ -39,7 +39,7 @@ def makedir(path:str, remove_filename:bool=False, recursive:bool=True, exist_ok:
     :type exist_ok: bool, optional
     """
     if '/' in path or '\\' in path:
-        path = path if not remove_filename else remove_filename_from_path(path)
+        path = path if not remove_filename else remove_filename_from_path(path, **kwargs)
         Path(path).mkdir(parents=recursive, exist_ok=exist_ok)
 
 def load_serialized_data(filename:str, return_dict_values:bool=False) -> Union[dict, Any]:
@@ -58,22 +58,22 @@ def load_serialized_data(filename:str, return_dict_values:bool=False) -> Union[d
         stored_data = pickle.load(fIn)
     return stored_data.values() if return_dict_values else stored_data
 
-def store_serialized_data(data, out_filename:str='serialized_data.pkl',
+def store_serialized_data(data, out_filename:str='serial\\serialized_data.pkl',
         protocol:int=pickle.HIGHEST_PROTOCOL) -> None:
     """Utility to dump precomputed data to disk using *pickle*.
 
     :param data: Tensor type data structure containing the dominant
      colours or histogram(s) for each sample in the dataset
-    :param out_filename: Path for the output file, defaults to 'serialized_data.pkl'.
+    :param out_filename: Path for the output file, defaults to 'serial\\serialized_data.pkl'.
     :type out_filename: str, optional
     :param protocol: Protocol used for *pickle*, defaults to `pickle.HIGHEST_PROTOCOL`.
     """
     # Create directory if it does not exist.
-    makedir(out_filename, remove_filename=True)
+    makedir(out_filename, remove_filename=True, path_standard_format=True)
     with open(out_filename, "wb") as fOut:
         pickle.dump(data, fOut, protocol=protocol)
   
-def scan_files(fdir:str, file_extension:str="jpg") -> np.array:
+def scan_files(fdir:str, file_extension:str="jpg") -> np.ndarray:
     """ Scan files recursively from a directory with a specific file extension.
 
     :param fdir: Source directory.
@@ -81,7 +81,7 @@ def scan_files(fdir:str, file_extension:str="jpg") -> np.array:
     :param file_extension: File extension, defaults to 'jpg'.
     :type file_extension: str, optional
     :return: collection of items satisfying the conditions specified
-    :rtype: np.array
+    :rtype: np.ndarray
     """
     return np.array([os.path.join(dirname, filename)
             for dirname, _, filenames in os.walk(fdir) 
@@ -138,18 +138,18 @@ def plot_img_grid(data:Iterable, col_space_conv:int=None, **kwargs) -> None:
     plt.tight_layout()
     plt.show()
 
-def resize_img(img:np.array, width:int=250, height:int=None) -> np.array:
+def resize_img(img:np.ndarray, width:int=250, height:int=None) -> np.ndarray:
     """Utility to resize an image.
 
     :param img: image to resize
-    :type img: np.array
+    :type img: np.ndarray
     :param width: new width of the image, defaults to 250
     :type width: int, optional
     :param height: new height of the image, defaults to None
     :type height: int, optional
     :raises ValueError: if neither the new width or height is specified
     :return: resized image
-    :rtype: np.array
+    :rtype: np.ndarray
     """
 
     if not (width or height):

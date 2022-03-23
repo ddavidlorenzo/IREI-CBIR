@@ -18,7 +18,7 @@ sys.setrecursionlimit(1500)
 
 # -- Project information -----------------------------------------------------
 
-project = 'Implementation of simple CBIR.'
+project = 'Implementation of a simple CBIR.'
 copyright = '2022, David Lorenzo Alfaro & Carlos Morote García'
 author = 'David Lorenzo Alfaro & Carlos Morote García'
 

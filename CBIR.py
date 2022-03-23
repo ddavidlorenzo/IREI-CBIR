@@ -4,14 +4,36 @@ from hist_search import HistogramSearch
 import numpy as np
 from utils import plot_img_grid
 
-def get_serial_path(search_method, serialize, wgrid=None, hgrid=None):        
+def get_serial_path(search_method:str, serialize:bool, wgrid=None, hgrid=None)->str:
+    """Returns path to load or store serialized data for a given search method.
+
+    :param search_method: type of search. Can be one of "smarthist", "hist" or "col".
+    :type search_method: str
+    :param serialize: whether serialization is to be performed. If 'None', no path will
+     be returned
+    :type serialize: bool
+    :param wgrid: number of rows to compute the image grid, defaults to 5
+    :type wgrid: int, optional
+    :param hgrid: number of columns to compute the image grid, defaults to 5
+    :type hgrid: int, optional
+    :return: path to load or store serialized data
+    :rtype: str
+    """
     return dict(
         smarthist = f'serial\\hist_serial_w{wgrid}_h{hgrid}.pkl',
         hist = "serial\\hist_serial.pkl",
         col = "serial\\colour_serial.pkl"
     )[search_method] if serialize else None
 
-def load_input_colour(colour):
+def parse_input_colour(colour:str)->np.array:
+    """Parse input colour from string.
+
+    :param colour: colour to parse. Can be one of "blue", "orange", "pink",
+     "purple", "yellow" or "custom".
+    :type colour: str
+    :return: representation of the desired colour in l*a*b colour space.
+    :rtype: np.array
+    """
     if colour!= "custom":
         return dict(
             blue = np.array([191, 118, 101]),
@@ -66,7 +88,7 @@ if __name__ == '__main__':
         results = img_search.smart_search(args.image, args.comparemethod, topk=args.topk, hgrid=args.hgrid, wgrid=args.wgrid)
     else:
         img_search = ColourSearch(args.datapath, serial_colour_path=get_serial_path(args.search, args.serialize))
-        results = img_search.search(load_input_colour(args.colour), topk=args.topk)
+        results = img_search.search(parse_input_colour(args.colour), topk=args.topk)
     
     plot_img_grid(results)
 

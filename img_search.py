@@ -9,7 +9,7 @@ class ImgSearch(object):
     # Collection of images
     __dataset = None
 
-    def __init__(self, dataset:Union[Iterable[np.array],str]) -> None:
+    def __init__(self, dataset:Union[Iterable[np.ndarray],str]) -> None:
         self.dataset = dataset
 
     def serialize(self):
@@ -31,21 +31,21 @@ class ImgSearch(object):
         return inner
 
     @property
-    def dataset(self)->Iterable[np.array]:
+    def dataset(self)->Iterable[np.ndarray]:
         """Getter method for `dataset`
 
         :return: collection of images.
-        :rtype: Iterable[np.array]
+        :rtype: Iterable[np.ndarray]
         """
         return self.__dataset
 
     @dataset.setter
-    def dataset(self, data:Union[Iterable[np.array],str]) -> None:
+    def dataset(self, data:Union[Iterable[np.ndarray],str]) -> None:
         """ Set or update the collection of images to use.
 
         :param dataset: dataset of images or path to the directory
          containg input samples.
-        :type dataset: Union[Iterable[np.array],str]
+        :type dataset: Union[Iterable[np.ndarray],str]
         """
         if type(data) == str:
             print(f'Loading data from path "{data}"')

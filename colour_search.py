@@ -12,7 +12,7 @@ class ColourSearch(ImgSearch):
     __serial_colour = None
     
     def __init__(self,
-                dataset: Union[Iterable[np.array],str],
+                dataset: Union[Iterable[np.ndarray],str],
                 serial_colour_path:str=None,
                 ) -> None:
         """Constructor for a `HistogramSearch` instance.
@@ -61,7 +61,7 @@ class ColourSearch(ImgSearch):
                          kmeans_eps:float=0.1,
                          kmeans_init:int=cv2.KMEANS_RANDOM_CENTERS,
                          kmeans_max_attempts:int=10
-                        ) -> Tuple[Iterable[np.array], Iterable[np.array]]:
+                        ) -> Tuple[Iterable[np.ndarray], Iterable[np.ndarray]]:
         """Compute the `n_colours` most representative colours of
         an image located in the path `img`.
 
@@ -86,7 +86,7 @@ class ColourSearch(ImgSearch):
         :type kmeans_max_attempts: int, optional
         :return: Collection of dominant colours and their frequence
         of appearance.
-        :rtype: Tuple[Iterable[np.array], Iterable[np.array]]
+        :rtype: Tuple[Iterable[np.ndarray], Iterable[np.ndarray]]
         """
         # Read image usingk l*a*b colour space.
         img = cv2.cvtColor(cv2.imread(img), cv2.COLOR_BGR2LAB)
@@ -126,7 +126,7 @@ class ColourSearch(ImgSearch):
         # Return the collection of dominant colours and their frequence
         return palette, freqs
 
-    def serialize(self, filename:str="serial\\colour_serial.pkl", **kwargs) -> Iterable[np.array]:
+    def serialize(self, filename:str="serial\\colour_serial.pkl", **kwargs) -> Iterable[np.ndarray]:
         """Serialize the computed dominant colours of the images in a dataset.
 
         :param filename: output filepath, defaults to "serial\\colour_serial.pkl"
@@ -137,28 +137,28 @@ class ColourSearch(ImgSearch):
         utils.store_serialized_data(dic, filename)
         return dic
 
-    def score_colour_img(self, colour:np.array, palette:Iterable[np.array]) -> float:
+    def score_colour_img(self, colour:np.ndarray, palette:Iterable[np.ndarray]) -> float:
         """Returns the minimum euclidean distance between the target colour
         and the dominant colours of an image, encoded in `palette`
 
         :param colour: target colour
-        :type colour: np.array
+        :type colour: np.ndarray
         :param palette: Collection of dominant colours
-        :type palette: Iterable[np.array]
+        :type palette: Iterable[np.ndarray]
         :return: Distance to the semantically closest colour to the target colour.
         :rtype: float
         """
         return min([np.linalg.norm(colour-c) for c in palette])
 
-    def search(self, colour:np.array, topk=10)->List[np.array]:
+    def search(self, colour:np.ndarray, topk=10)->List[np.ndarray]:
         """Search images in `dataset` matching with similar colours to `colour`.
 
         :param colour: query colour
-        :type colour: array like (e.g., `np.array`)
+        :type colour: array like (e.g., `np.ndarray`)
         :param topk: top k images to retrieve, defaults to 10
         :type topk: int, optional
         :return: top k most relevant images found
-        :rtype: List[np.array]
+        :rtype: List[np.ndarray]
         """
         if self.serial_colour:
             scores = np.argsort([self.score_colour_img(colour, self.serial_colour[img][0]) for img in self.dataset])

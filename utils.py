@@ -73,7 +73,7 @@ def store_serialized_data(data, out_filename:str='serial\\serialized_data.pkl',
     with open(out_filename, "wb") as fOut:
         pickle.dump(data, fOut, protocol=protocol)
   
-def scan_files(fdir:str, file_extension:str="jpg") -> np.array:
+def scan_files(fdir:str, file_extension:str="jpg") -> np.ndarray:
     """ Scan files recursively from a directory with a specific file extension.
 
     :param fdir: Source directory.
@@ -81,7 +81,7 @@ def scan_files(fdir:str, file_extension:str="jpg") -> np.array:
     :param file_extension: File extension, defaults to 'jpg'.
     :type file_extension: str, optional
     :return: collection of items satisfying the conditions specified
-    :rtype: np.array
+    :rtype: np.ndarray
     """
     return np.array([os.path.join(dirname, filename)
             for dirname, _, filenames in os.walk(fdir) 
@@ -138,18 +138,18 @@ def plot_img_grid(data:Iterable, col_space_conv:int=None, **kwargs) -> None:
     plt.tight_layout()
     plt.show()
 
-def resize_img(img:np.array, width:int=250, height:int=None) -> np.array:
+def resize_img(img:np.ndarray, width:int=250, height:int=None) -> np.ndarray:
     """Utility to resize an image.
 
     :param img: image to resize
-    :type img: np.array
+    :type img: np.ndarray
     :param width: new width of the image, defaults to 250
     :type width: int, optional
     :param height: new height of the image, defaults to None
     :type height: int, optional
     :raises ValueError: if neither the new width or height is specified
     :return: resized image
-    :rtype: np.array
+    :rtype: np.ndarray
     """
 
     if not (width or height):

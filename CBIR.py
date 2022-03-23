@@ -25,14 +25,14 @@ def get_serial_path(search_method:str, serialize:bool, wgrid=None, hgrid=None)->
         col = "serial\\colour_serial.pkl"
     )[search_method] if serialize else None
 
-def parse_input_colour(colour:str)->np.array:
+def parse_input_colour(colour:str)->np.ndarray:
     """Parse input colour from string.
 
     :param colour: colour to parse. Can be one of "blue", "orange", "pink",
      "purple", "yellow" or "custom".
     :type colour: str
     :return: representation of the desired colour in l*a*b colour space.
-    :rtype: np.array
+    :rtype: np.darray
     """
     if colour!= "custom":
         return dict(
@@ -67,8 +67,8 @@ if __name__ == '__main__':
                 help="Number of rows to compute image grids, both in image query and dataset samples")
     parser.add_argument("-se", "--serialize", action="store_true",
                 help="Serialize data to speed-up retrieval.")
-    parser.add_argument("-cm", "--comparemethod", default="hellinger", choices=["corr", "chisq", "intersect", "hellinger"],
-                help="Histogram compare method. Used only for smart histogram and histogram search.")
+    parser.add_argument("-cm", "--comparison_method", default="hellinger", choices=["corr", "chisq", "intersect", "hellinger"],
+                help="Histogram comparison method. Used only for smart histogram and histogram search.")
 
     # Parse arguments.
     args = parser.parse_args()

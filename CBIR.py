@@ -67,6 +67,9 @@ if __name__ == '__main__':
                 help="Number of rows to compute image grids, both in image query and dataset samples")
     parser.add_argument("-se", "--serialize", action="store_true",
                 help="Serialize data to speed-up retrieval.")
+    parser.add_argument("--weight_by_freq", action="store_true",
+                help="Whether to compute colour matching score accounting for the frequency of the dominant"
+                + " colours in images.Used only on colour search.")
     parser.add_argument("-cm", "--comparison_method", default="hellinger", choices=["corr", "chisq", "intersect", "hellinger"],
                 help="Histogram comparison method. Used only for smart histogram and histogram search.")
 
@@ -88,7 +91,7 @@ if __name__ == '__main__':
         results = img_search.smart_search(args.image, args.comparemethod, topk=args.topk, hgrid=args.hgrid, wgrid=args.wgrid)
     else:
         img_search = ColourSearch(args.datapath, serial_colour_path=get_serial_path(args.search, args.serialize))
-        results = img_search.search(parse_input_colour(args.colour), topk=args.topk)
+        results = img_search.search(parse_input_colour(args.colour), topk=args.topk, weighted_freq=args.weight_by_freq)
     
     plot_img_grid(results)
 

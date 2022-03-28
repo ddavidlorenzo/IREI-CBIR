@@ -16,7 +16,7 @@ class HistogramSearch(ImgSearch):
         "corr": cv2.HISTCMP_CORREL,
         "chisq": cv2.HISTCMP_CHISQR,
         "intersect": cv2.HISTCMP_INTERSECT,
-        "hellinger": cv2.HISTCMP_BHATTACHARYYA
+        "bhatta": cv2.HISTCMP_BHATTACHARYYA
     }
 
     # Precomputed computed histograms
@@ -27,7 +27,9 @@ class HistogramSearch(ImgSearch):
     def __init__(self,
                 dataset:Union[Iterable[np.ndarray],str],
                 serial_hist_path:str=None,
-                serial_grid_hist_path:str=None
+                serial_grid_hist_path:str=None,
+                hgrid:int=5,
+                wgrid:int=5,
                 ) -> None:
         """Constructor for a `HistogramSearch` instance.
 
@@ -39,13 +41,18 @@ class HistogramSearch(ImgSearch):
         :param serial_grid_hist_path: Path to serialize computed grid 
          histograms, defaults to None
         :type serial_grid_hist_path: str, optional
+        :param hgrid: number of columns to compute the image grid, defaults to None
+        :type hgrid: int, optional
+        :param wgrid: number of rows to compute the image grid, defaults to None
+        :type wgrid: int, optional
         """
         super().__init__(dataset)
+        self.hgrid = hgrid
+        self.wgrid = wgrid
         if serial_hist_path: 
             self.serial_hist = serial_hist_path
         if serial_grid_hist_path:
             self.serial_grid_hist = serial_grid_hist_path
-
 
     def serialize(self, filename:str="serial\\hist_serial.pkl", grid:bool=False, **kwargs):
         """Serialize the histogram of colours of the images in a dataset.
@@ -65,19 +72,21 @@ class HistogramSearch(ImgSearch):
         return dic
 
     @ImgSearch.load_image
-    def img_grid(self, img:Union[np.ndarray,str], hgrid:int=5, wgrid:int=5)->List[np.ndarray]:
+    def img_grid(self, img:Union[np.ndarray,str], hgrid:int=None, wgrid:int=None)->List[np.ndarray]:
         """Divide an image in equally-sized fragments, conforming a grid with 
         `hgrid` columns and `wgrid` rows.
 
         :param img: image or path to target image.
         :type img: Union[np.ndarray,str]
-        :param hgrid: number of columns to compute the image grid, defaults to 5
+        :param hgrid: number of columns to compute the image grid, defaults to None
         :type hgrid: int, optional
-        :param wgrid: number of rows to compute the image grid, defaults to 5
+        :param wgrid: number of rows to compute the image grid, defaults to None
         :type wgrid: int, optional
         :return: grid of subimages.
         :rtype: List[np.ndarray]
         """
+        hgrid = hgrid or self.hgrid
+        wgrid = wgrid or self.wgrid
         h, w, _ = img.shape
         return [img[int(h/hgrid)*j:int(h/hgrid)*(j+1), 
                     int(w/wgrid)*i:int(w/wgrid)*(i+1)] 
@@ -253,15 +262,11 @@ class HistogramSearch(ImgSearch):
         return self.__serial_grid_hist
 
     @serial_grid_hist.setter
-    def serial_grid_hist(self, path:str, hgrid:int=5, wgrid:int=5)->None:
+    def serial_grid_hist(self, path:str)->None:
         """Set or update the filepath to load (store) smart serialized histograms.
 
         :param path: filepath to load (store) serialized smart histograms.
         :type path: str
-        :param hgrid: number of columns to compute the image grid, defaults to 5
-        :type hgrid: int, optional
-        :param wgrid: number of rows to compute the image grid, defaults to 5
-        :type wgrid: int, optional
         """
         # If the index exists, load it off disk.
         if os.path.exists(path):
@@ -269,7 +274,7 @@ class HistogramSearch(ImgSearch):
             self.__serial_grid_hist = utils.load_serialized_data(path)
         # otherwise, dump data to filepath `path`
         else:
-            print(f"File '{path}' does not exists. Creating a new index in that path with params 'hgrid'={hgrid}, 'wgrid'={wgrid}.")
+            print(f"File '{path}' does not exists. Creating a new index in that path with params hgrid={self.hgrid}, wgrid={self.wgrid}.")
             self.__serial_hist = self.serialize(path)
 
 
@@ -283,7 +288,12 @@ if __name__ == "__main__":
     WGRID=3
     SERIAL_GRID_PATH = f'serial\\hist_serial_w{WGRID}_h{HGRID}.pkl'
    
-    histogram_search = HistogramSearch(BASE_DIR, serial_hist_path=SERIAL_PATH, serial_grid_hist_path=SERIAL_GRID_PATH)
+    histogram_search = HistogramSearch(BASE_DIR,
+                                       serial_hist_path=SERIAL_PATH,
+                                       serial_grid_hist_path=SERIAL_GRID_PATH,
+                                       hgrid=HGRID,
+                                       wgrid=WGRID
+                                      )
 
-    results = histogram_search.smart_search(SAMPLE_IMAGE, "hellinger")
+    results = histogram_search.smart_search(SAMPLE_IMAGE, "bhatta")
     utils.plot_img_grid(results)

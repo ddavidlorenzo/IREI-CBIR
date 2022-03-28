@@ -67,7 +67,10 @@ if __name__ == '__main__':
                 help="Number of rows to compute image grids, both in image query and dataset samples")
     parser.add_argument("-se", "--serialize", action="store_true",
                 help="Serialize data to speed-up retrieval.")
-    parser.add_argument("-cm", "--comparison_method", default="hellinger", choices=["corr", "chisq", "intersect", "hellinger"],
+    parser.add_argument("--weight_by_freq", action="store_true",
+                help="Whether to compute colour matching score accounting for the frequency of the dominant"
+                + " colours in images.Used only on colour search.")
+    parser.add_argument("-cm", "--comparison_method", default="bhatta", choices=["corr", "chisq", "intersect", "bhatta"],
                 help="Histogram comparison method. Used only for smart histogram and histogram search.")
 
     # Parse arguments.
@@ -75,7 +78,7 @@ if __name__ == '__main__':
     
     if args.search == "hist":
         img_search = HistogramSearch(args.datapath, serial_hist_path=get_serial_path(args.search, args.serialize))
-        results = img_search.search(args.image, args.comparemethod, topk=args.topk)
+        results = img_search.search(args.image, args.comparison_method, topk=args.topk)
     elif args.search == "smarthist":
         img_search = HistogramSearch(args.datapath,
                                      serial_hist_path=get_serial_path(
@@ -83,12 +86,14 @@ if __name__ == '__main__':
                                                                       args.serialize, 
                                                                       hgrid=args.hgrid,
                                                                       wgrid=args.wgrid
-                                                                    )
+                                                                    ),
+                                    hgrid=args.hgrid,
+                                    wgrid=args.wgrid
                                     )
-        results = img_search.smart_search(args.image, args.comparemethod, topk=args.topk, hgrid=args.hgrid, wgrid=args.wgrid)
+        results = img_search.smart_search(args.image, args.comparison_method, topk=args.topk, hgrid=args.hgrid, wgrid=args.wgrid)
     else:
         img_search = ColourSearch(args.datapath, serial_colour_path=get_serial_path(args.search, args.serialize))
-        results = img_search.search(parse_input_colour(args.colour), topk=args.topk)
+        results = img_search.search(parse_input_colour(args.colour), topk=args.topk, weighted_freq=args.weight_by_freq)
     
     plot_img_grid(results)
 
@@ -97,10 +102,10 @@ if __name__ == '__main__':
 
 # Execution examples
 # Colour search
-# python CBIR.py "pokemon_dataset\\" col -c custom -t 15 -se
+# python CBIR.py "pokemon_dataset" col -c custom -t 15 -se
 
 # Histogram search
-# python CBIR.py "pokemon_dataset\\" hist -i "pokemon_dataset\\Aerodactyl\\d1d381e5f2df42a0973e0251751e1a14.jpg" -t 15 -se -cm hellinger
+# python CBIR.py "pokemon_dataset" hist -i "pokemon_dataset\\Aerodactyl\\d1d381e5f2df42a0973e0251751e1a14.jpg" -t 15 -se -cm bhatta
 
 # Smart histogram search
-# python CBIR.py "pokemon_dataset\\" smarthist -i "pokemon_dataset\\Aerodactyl\\d1d381e5f2df42a0973e0251751e1a14.jpg" -t 15 -hg 5 -wg 5 -se -cm hellinger
+# python CBIR.py "pokemon_dataset" smarthist -i "pokemon_dataset\\Aerodactyl\\d1d381e5f2df42a0973e0251751e1a14.jpg" -t 15 -hg 5 -wg 5 -se -cm bhatta

@@ -4,7 +4,6 @@ import os
 import numpy as np
 import utils
 from img_search import ImgSearch
-from functools import wraps
 
 class ColourSearch(ImgSearch):
     """This class implements a colour search IR method."""
@@ -107,7 +106,7 @@ class ColourSearch(ImgSearch):
         # Sort them in decreasing order respect to their recurrence
         indices = np.argsort(counts)[::-1]
         # Compute the relative frequencies of each cluster   
-        freqs = np.array([counts[indices]/float(counts.sum())])
+        freqs = np.array(counts[indices]/float(counts.sum()))
 
         # Plot the result
         if show_palette:
@@ -138,48 +137,65 @@ class ColourSearch(ImgSearch):
         utils.store_serialized_data(dic, filename)
         return dic
 
-    def score_colour_img(self, colour:np.ndarray, palette:Iterable[np.ndarray]) -> float:
-        """Returns the minimum euclidean distance between the target colour
-        and the dominant colours of an image, encoded in `palette`
+    def score_colour_img(self, 
+                         colour:np.ndarray, 
+                         palette:Iterable[np.ndarray],
+                         frequencies:Iterable[np.ndarray],
+                         weighted_freq) -> float:
+        """If `weighted_freq=False`, it returns the minimum Euclidean 
+        distance between the target colour and the dominant colours of an 
+        image, encoded in `palette`. Otherwise, the score is computed as the
+        sum of the Euclidean distances between the query colour and the dominant
+        colours of the imaged, weighted by their frequency, enconded in `frequencies`. 
 
         :param colour: target colour
         :type colour: np.ndarray
         :param palette: Collection of dominant colours
         :type palette: Iterable[np.ndarray]
+        :param frequencies: Collection of normalized frequencies of appearance
+         of dominant colours. 
+        :type frequencies: Iterable[np.ndarray]
+        :param weighted_search: whether to compute colour matching score accounting
+         for the frequency of the dominant colours in the image.
+        :type weighted_search: bool
         :return: Distance to the semantically closest colour to the target colour.
         :rtype: float
         """
-        return min([np.linalg.norm(colour-c) for c in palette])
+        return min([np.linalg.norm(colour-c) for c in palette]) if not weighted_freq \
+            else sum([np.linalg.norm(colour-c)*f for c,f in zip(palette,frequencies)])
 
-    def search(self, colour:np.ndarray, topk=10)->List[np.ndarray]:
+    def search(self, colour:np.ndarray, topk=10, weighted_freq=False)->List[np.ndarray]:
         """Search images in `dataset` matching with similar colours to `colour`.
 
         :param colour: query colour
         :type colour: array like (e.g., `np.ndarray`)
         :param topk: top k images to retrieve, defaults to 10
         :type topk: int, optional
+        :param weighted_freq: whether to compute colour matching score accounting
+         for the frequency of the dominant colours in the image. Refer to the 
+         documentation of the `dominant_colours` function, should you require it. 
+         Defaults to false
+        :type weighted_freq: bool, optional
         :return: top k most relevant images found
         :rtype: List[np.ndarray]
         """
         if self.serial_colour:
-            scores = np.argsort([self.score_colour_img(colour, self.serial_colour[img][0]) for img in self.dataset])
+            scores = np.argsort([self.score_colour_img(colour, *self.serial_colour[img], weighted_freq) for img in self.dataset])
         else:
-            scores = np.argsort([self.score_colour_img(colour, self.dominant_colours(img)[0]) for img in self.dataset])
+            scores = np.argsort([self.score_colour_img(colour, *self.dominant_colours(img), weighted_freq) for img in self.dataset])
         return self.dataset[scores[:topk]]
 
 
 # Execution example
 if __name__ == "__main__":
     BASE_DIR = 'pokemon_dataset\\'
-    
-    # b= np.array([[[233, 192, 129]]], dtype='uint8')
-    # color = cv2.cvtColor(b, cv2.COLOR_BGR2LAB)
 
     # Yellow
     COLOUR = np.array([232, 118, 217])
     SERIAL_PATH = 'serial\\colour_serial.pkl'
 
     colour_search = ColourSearch(BASE_DIR, serial_colour_path=SERIAL_PATH)
+    colour_search.dominant_colours("pokemon_dataset\\Eevee\\00000030.jpg",show_palette=True)
 
-    results = colour_search.search(COLOUR)
-    utils.plot_img_grid(results)
+    # results = colour_search.search(COLOUR, weighted_freq=True)
+    # utils.plot_img_grid(results)

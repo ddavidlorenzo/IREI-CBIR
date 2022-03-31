@@ -97,8 +97,6 @@ if __name__ == '__main__':
     
     plot_img_grid(results)
 
-# directory setting
-# cd "Desktop\\Máster\\Information Retrieval, Extraction And Integration\\4. Non textual data extraction\\CBIR"
 
 # Execution examples
 # Colour search

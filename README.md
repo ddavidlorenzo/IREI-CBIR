@@ -59,8 +59,8 @@ In order to know the parameters that the function uses type:
 
 ```
 .
-.
 ├── README.md
+├── Report.pdf
 ├── CBIR.py
 ├── SIFT.py
 ├── colour_search.py
